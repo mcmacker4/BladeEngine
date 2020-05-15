@@ -5,9 +5,9 @@ import org.lwjgl.opengl.GL20.glVertexAttribPointer
 import org.lwjgl.opengl.GL30.*
 
 
-class VertexArrayObject(vararg attribs: VertexAttribute) {
+class VertexArrayObject(attribs: List<VertexAttribute>) {
     
-    private val id = glGenVertexArrays()
+    private var id = glGenVertexArrays()
     
     init {
         bind()
@@ -32,6 +32,7 @@ class VertexArrayObject(vararg attribs: VertexAttribute) {
     
     fun delete() {
         glDeleteVertexArrays(id)
+        id = 0
     }
     
 }

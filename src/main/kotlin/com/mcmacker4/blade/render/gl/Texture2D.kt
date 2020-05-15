@@ -7,7 +7,7 @@ import java.nio.ByteBuffer
 
 class Texture2D {
     
-    private val id = glGenTextures()
+    private var id = glGenTextures()
     
     constructor(width: Int, height: Int, data: ByteBuffer, format: Int, internalFormat: Int, type: Int) {
         bind()
@@ -27,6 +27,11 @@ class Texture2D {
     
     fun unbind() {
         glBindTexture(GL_TEXTURE_2D, 0)
+    }
+    
+    fun delete() {
+        glDeleteTextures(id)
+        id = 0
     }
     
 }

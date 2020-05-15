@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL20.*
 
 class ShaderProgram(vSource: String, fSource: String) {
     
-    private val id: Int
+    private var id: Int
     
     init {
         val vShader = compileShader(GL_VERTEX_SHADER, vSource)
@@ -31,6 +31,7 @@ class ShaderProgram(vSource: String, fSource: String) {
     
     fun delete() {
         glDeleteProgram(id)
+        id = 0
     }
     
     companion object {

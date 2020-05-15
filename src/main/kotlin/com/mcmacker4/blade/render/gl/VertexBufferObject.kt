@@ -5,7 +5,7 @@ import org.lwjgl.opengl.GL15.*
 
 class VertexBufferObject {
     
-    private val id: Int = glGenBuffers()
+    private var id: Int = glGenBuffers()
 
     constructor(data: FloatArray, usage: Int) {
         glBindBuffer(GL_ARRAY_BUFFER, id)
@@ -33,6 +33,7 @@ class VertexBufferObject {
     
     fun delete() {
         glDeleteBuffers(id)
+        id = 0
     }
     
 }
