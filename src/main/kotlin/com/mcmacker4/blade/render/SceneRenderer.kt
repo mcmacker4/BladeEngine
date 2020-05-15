@@ -4,14 +4,13 @@ import com.mcmacker4.blade.render.gl.ShaderProgram
 import com.mcmacker4.blade.scene.Scene
 import com.mcmacker4.blade.scene.components.CameraComponent
 import com.mcmacker4.blade.scene.components.MeshComponent
-import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL20.*
 import org.lwjgl.system.MemoryStack
 
 
 class SceneRenderer {
     
-    private val shader = ShaderProgram.loadNamed("shader")
+    private val shader = ShaderProgram.loadNamed("/shader")
     
     fun render(scene: Scene) {
         
@@ -21,7 +20,7 @@ class SceneRenderer {
 
             val modelMatrixLocation = shader.getUniformLocation("modelMatrix")
             val projectionMatrixLocation = shader.getUniformLocation("projectionMatrix")
-
+            
             val cameraComponent = camera.getComponent(CameraComponent::class)!!
             MemoryStack.stackPush().use { stack ->
                 val modelBuffer = cameraComponent.matrix.get(stack.mallocFloat(16))
@@ -37,8 +36,13 @@ class SceneRenderer {
                     glUniformMatrix4fv(modelMatrixLocation, false, modelBuffer)
                 }
 
-                val component = entity.getComponent(MeshComponent::class)!!
-                component.mesh.render()
+                val meshComponent = entity.getComponent(MeshComponent::class)!!
+                
+                meshComponent.material.texture.bind()
+                
+                meshComponent.mesh.render()
+                
+                glBindTexture(GL_TEXTURE_2D, 0)
 
             }
 

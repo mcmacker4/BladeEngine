@@ -1,6 +1,8 @@
 package com.mcmacker4.blade
 
-import com.mcmacker4.blade.render.Mesh
+import com.mcmacker4.blade.render.data.Material
+import com.mcmacker4.blade.render.data.Mesh
+import com.mcmacker4.blade.render.gl.Texture2D
 import com.mcmacker4.blade.scene.Entity
 import com.mcmacker4.blade.scene.Scene
 import com.mcmacker4.blade.scene.components.BehaviourComponent
@@ -8,7 +10,7 @@ import com.mcmacker4.blade.scene.components.CameraComponent
 import com.mcmacker4.blade.scene.components.MeshComponent
 import org.joml.Quaternionf
 import org.joml.Vector3f
-import kotlin.math.sin
+import java.io.File
 
 class TriangleBehaviour : BehaviourComponent() {
     
@@ -16,23 +18,22 @@ class TriangleBehaviour : BehaviourComponent() {
         val deltaRot = Math.PI * Timer.delta
         entity?.apply {
             rotation.mul(Quaternionf().rotateY(deltaRot.toFloat()))
-            position.set(0f, 0f, sin(Timer.now).toFloat() - 2f)
         }
     }
     
 }
 
 fun main() {
-    
+
     BladeEngine.initialize()
-    
+
     val scene = Scene()
-    val triangle = Entity(Vector3f(0f, 0f, -1f))
-    
-    scene.setActiveCamera(Entity(components = arrayListOf(
-            CameraComponent(Math.toRadians(90.0))
-    )))
-    
+    val triangle = Entity(Vector3f(0f, 0f, -1.5f))
+
+    val camera = Entity()
+    camera.addComponent(CameraComponent(Math.toRadians(90.0)))
+    scene.setActiveCamera(camera)
+
     val mesh = Mesh(
             floatArrayOf(
                     -0.5f, -0.5f, 0f,
@@ -45,17 +46,19 @@ fun main() {
                     0f, 0f, 0f
             ),
             floatArrayOf(
-                    0f, 0f,
-                    1f, 0f,
-                    .5f, 1f
+                    0f, 1f,
+                    1f, 1f,
+                    0.5f, 0f
             )
     )
+
+    val material = Material(Texture2D.loadFromFile("/texture.png"))
     
-    triangle.addComponent(MeshComponent(mesh))
+    triangle.addComponent(MeshComponent(mesh, material))
     triangle.addComponent(TriangleBehaviour())
-    
+
     scene.addEntity(triangle)
-    
+
     BladeEngine.start(scene)
     
 }

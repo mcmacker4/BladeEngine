@@ -17,6 +17,9 @@ object BladeEngine {
     private lateinit var sceneRenderer: SceneRenderer
     
     fun initialize() {
+        
+        println("Initializing Engine")
+        
         glfwSetErrorCallback { error, description ->
             println("GLFW Error $error: $description")
         }

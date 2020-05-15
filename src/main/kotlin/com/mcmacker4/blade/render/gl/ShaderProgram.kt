@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL20.*
 class ShaderProgram(vSource: String, fSource: String) {
     
     private var id: Int
+    private val uniformCache = hashMapOf<String, Int>()
     
     init {
         val vShader = compileShader(GL_VERTEX_SHADER, vSource)
@@ -29,7 +30,8 @@ class ShaderProgram(vSource: String, fSource: String) {
         glUseProgram(id)
     }
     
-    fun getUniformLocation(name: String) = glGetUniformLocation(id, name)
+    fun getUniformLocation(name: String)
+            = uniformCache.getOrPut(name) { glGetUniformLocation(id, name) }
     
     fun delete() {
         glDeleteProgram(id)
@@ -39,8 +41,9 @@ class ShaderProgram(vSource: String, fSource: String) {
     companion object {
 
         fun loadNamed(name: String): ShaderProgram {
-            val vSource = readFileToString("/$name.v.glsl")
-            val fSource = readFileToString("/$name.f.glsl")
+            println("Loading shader: $name")
+            val vSource = readFileToString("$name.v.glsl")
+            val fSource = readFileToString("$name.f.glsl")
             return ShaderProgram(vSource, fSource)
         }
 

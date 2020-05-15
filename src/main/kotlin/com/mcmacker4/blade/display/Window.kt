@@ -30,6 +30,8 @@ class Window(private var width: Int, private var height: Int, title: String) {
         if (window == MemoryUtil.NULL) {
             throw Exception("Could not create Window.")
         }
+        
+        println("Window has been created.")
 
         glfwSetWindowSizeCallback(window, this::resizeCallback)
         

@@ -1,4 +1,4 @@
-package com.mcmacker4.blade.render
+package com.mcmacker4.blade.render.data
 
 import com.mcmacker4.blade.render.gl.VertexArrayObject
 import com.mcmacker4.blade.render.gl.VertexAttribute
