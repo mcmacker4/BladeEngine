@@ -29,6 +29,8 @@ class ShaderProgram(vSource: String, fSource: String) {
         glUseProgram(id)
     }
     
+    fun getUniformLocation(name: String) = glGetUniformLocation(id, name)
+    
     fun delete() {
         glDeleteProgram(id)
         id = 0

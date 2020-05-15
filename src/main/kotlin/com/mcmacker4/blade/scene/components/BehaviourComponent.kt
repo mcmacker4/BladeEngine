@@ -1,16 +1,12 @@
 package com.mcmacker4.blade.scene.components
 
-import com.mcmacker4.blade.render.Mesh
 import com.mcmacker4.blade.scene.Component
 
 
-class MeshComponent(val mesh : Mesh) : Component() {
+abstract class BehaviourComponent : Component() {
 
     override fun onInit() {}
     override fun onUpdate() {}
-
-    override fun onDestroy() {
-        mesh.delete()
-    }
+    override fun onDestroy() {}
     
 }
