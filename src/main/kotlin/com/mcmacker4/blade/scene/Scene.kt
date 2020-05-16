@@ -1,14 +1,17 @@
 package com.mcmacker4.blade.scene
 
 import com.mcmacker4.blade.scene.components.CameraComponent
-import com.mcmacker4.blade.scene.components.MeshComponent
+import org.lwjgl.glfw.GLFW.GLFW_PRESS
+import org.lwjgl.glfw.GLFW.GLFW_RELEASE
 
 
 class Scene {
     
-    private val entities = ArrayList<Entity>()
+    private val entities = HashSet<Entity>()
     
     private var activeCamera: Entity? = null
+
+    fun getEntities() : Set<Entity> = entities
     
     fun addEntity(entity: Entity) {
         entities.add(entity)
@@ -17,28 +20,30 @@ class Scene {
     fun removeEntity(entity: Entity) {
         entities.remove(entity)
     }
+
+    fun getActiveCamera() = activeCamera
     
     fun setActiveCamera(camera: Entity) {
         if (!camera.hasComponent(CameraComponent::class))
             throw Exception("Active camera is missing the CameraComponent")
+        if (!entities.contains(camera))
+            entities.add(camera)
         this.activeCamera = camera
     }
-    
-    fun getActiveCamera() = activeCamera
     
     fun update() {
         entities.forEach { it.onUpdate() }
     }
     
-    fun destroy() {
-        for (entity in entities) {
-            entity.onDestroy()
-        }
+    internal fun propagateMouseEvent(xpos: Double, ypos: Double, dx: Double, dy: Double) {
+        entities.forEach { it.onMouseMoved(xpos, ypos, dx, dy) }
     }
     
-    fun getEntities() : List<Entity> = entities
-    
-    fun getDrawableEntities() : List<Entity> =
-            entities.filter { it.hasComponent(MeshComponent::class) }
+    internal fun propagateKeyEvent(key: Int, action: Int) {
+        if (action == GLFW_PRESS)
+            entities.forEach { it.onKeyDown(key) }
+        else if (action == GLFW_RELEASE)
+            entities.forEach { it.onKeyUp(key) }
+    }
     
 }

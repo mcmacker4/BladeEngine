@@ -76,4 +76,6 @@ class Window(private var width: Int, private var height: Int, title: String) {
         glfwDestroyWindow(window)
     }
     
+    fun ref() = window
+    
 }

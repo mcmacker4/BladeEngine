@@ -14,6 +14,5 @@ abstract class Component {
     
     abstract fun onInit()
     abstract fun onUpdate()
-    abstract fun onDestroy()
     
 }

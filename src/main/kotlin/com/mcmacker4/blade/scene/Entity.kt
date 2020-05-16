@@ -1,5 +1,8 @@
 package com.mcmacker4.blade.scene
 
+import com.mcmacker4.blade.input.Keyboard
+import com.mcmacker4.blade.input.KeyboardListener
+import com.mcmacker4.blade.input.MouseListener
 import org.joml.*
 import kotlin.reflect.KClass
 import kotlin.reflect.full.cast
@@ -10,7 +13,7 @@ class Entity(
         val rotation: Quaternionf = Quaternionf(),
         val scale: Vector3f = Vector3f(1.0f),
         private val components: ArrayList<Component> = arrayListOf()
-) {
+) : MouseListener, KeyboardListener {
     
     private val modelMatrix = Matrix4f().identity()
     
@@ -31,11 +34,6 @@ class Entity(
                 .translate(position)
                 .rotate(rotation)
                 .scale(scale)
-    }
-    
-    fun onDestroy() {
-        children.forEach { it.onDestroy() }
-        components.forEach { it.onDestroy() }
     }
     
     // Hierarchy
@@ -100,5 +98,29 @@ class Entity(
         }
         cache.remove(kClass)
     }
-    
+
+    override fun onMouseMoved(x: Double, y: Double, dx: Double, dy: Double) {
+        components.forEach { component ->
+            if (component is MouseListener)
+                component.onMouseMoved(x, y, dx, dy)
+        }
+        children.forEach { it.onMouseMoved(x, y, dx, dy) }
+    }
+
+    override fun onKeyDown(key: Int) {
+        components.forEach { component ->
+            if (component is KeyboardListener)
+                component.onKeyDown(key)
+        }
+        children.forEach { it.onKeyDown(key) }
+    }
+
+    override fun onKeyUp(key: Int) {
+        components.forEach { component ->
+            if (component is KeyboardListener)
+                component.onKeyUp(key)
+        }
+        children.forEach { it.onKeyUp(key) }
+    }
+
 }

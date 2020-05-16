@@ -1,10 +1,6 @@
 package com.mcmacker4.blade.model
 
-import com.mcmacker4.blade.render.data.Material
-import com.mcmacker4.blade.render.data.Mesh
-import org.lwjgl.assimp.AIMaterial
-import org.lwjgl.assimp.AIScene
-import org.lwjgl.assimp.Assimp
+import com.mcmacker4.blade.resource.Mesh
 
 class Model(
         val meshes: Array<Mesh>

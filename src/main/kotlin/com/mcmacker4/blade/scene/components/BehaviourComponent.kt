@@ -7,6 +7,5 @@ abstract class BehaviourComponent : Component() {
 
     override fun onInit() {}
     override fun onUpdate() {}
-    override fun onDestroy() {}
     
 }

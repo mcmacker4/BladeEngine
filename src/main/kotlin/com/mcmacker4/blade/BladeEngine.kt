@@ -1,6 +1,8 @@
 package com.mcmacker4.blade
 
 import com.mcmacker4.blade.display.Window
+import com.mcmacker4.blade.input.Keyboard
+import com.mcmacker4.blade.input.Mouse
 import com.mcmacker4.blade.render.SceneRenderer
 import com.mcmacker4.blade.scene.Scene
 import org.lwjgl.glfw.GLFW.*
@@ -15,6 +17,13 @@ object BladeEngine {
         private set
     
     private lateinit var sceneRenderer: SceneRenderer
+    
+    lateinit var keyboard: Keyboard
+        private set
+    lateinit var mouse: Mouse
+        private set
+    
+    private var running = true
     
     fun initialize() {
         
@@ -32,11 +41,10 @@ object BladeEngine {
 
         glClearColor(0.3f, 0.6f, 0.9f, 1.0f)
         
+        keyboard = Keyboard()
+        mouse = Mouse()
+        
         sceneRenderer = SceneRenderer()
-    }
-    
-    fun setScene(scene: Scene) {
-        this.scene = scene
     }
     
     fun start(scene: Scene) {
@@ -49,7 +57,18 @@ object BladeEngine {
         
         Timer.start()
         
-        while (!window.shouldClose) {
+        glfwSetCursorPosCallback(window.ref()) { _, xpos, ypos ->  
+            val dx = xpos - mouse.xpos
+            val dy = ypos - mouse.ypos
+            mouse.update(xpos, ypos)
+            scene.propagateMouseEvent(xpos, ypos, dx, dy)
+        }
+        
+        glfwSetKeyCallback(window.ref()) { _, key, _, action, _ ->  
+            scene.propagateKeyEvent(key, action)
+        }
+        
+        while (running && !window.shouldClose) {
             val nextFrameTime = glfwGetTime() + frameTime
             
             glfwPollEvents()
@@ -65,12 +84,17 @@ object BladeEngine {
             while (glfwGetTime() < nextFrameTime) Thread.yield()
         }
         
-        scene.destroy()
+    }
+    
+    fun stop() {
+        this.running = false
+    }
+    
+    fun destroy() {
         sceneRenderer.destroy()
         window.destroy()
-        
+
         glfwTerminate()
-        
     }
     
 }
