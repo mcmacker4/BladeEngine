@@ -9,7 +9,7 @@ class VertexBufferObject {
 
     constructor(data: FloatArray, usage: Int) {
         glBindBuffer(GL_ARRAY_BUFFER, id)
-        glBufferData(GL_ARRAY_BUFFER, data, usage);
+        glBufferData(GL_ARRAY_BUFFER, data, usage)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
     }
     

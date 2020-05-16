@@ -5,12 +5,13 @@ import org.lwjgl.opengl.GL20.glVertexAttribPointer
 import org.lwjgl.opengl.GL30.*
 
 
-class VertexArrayObject(attribs: List<VertexAttribute>) {
+class VertexArrayObject(elements: ElementArrayBuffer, attribs: List<VertexAttribute>) {
     
     private var id = glGenVertexArrays()
     
     init {
         bind()
+        elements.bind()
         attribs.forEach(this::bindAttribute)
         unbind()
     }

@@ -13,8 +13,11 @@ class Window(private var width: Int, private var height: Int, title: String) {
     val shouldClose: Boolean
         get() = glfwWindowShouldClose(window)
     
+    var isFullscreen = false
+        private set
+    
     val aspectRatio: Float
-            get() = width.toFloat() / height.toFloat()
+        get() = width.toFloat() / height.toFloat()
     
     init {
         glfwDefaultWindowHints()
@@ -66,6 +69,26 @@ class Window(private var width: Int, private var height: Int, title: String) {
     
     fun show() {
         glfwShowWindow(window)
+    }
+    
+    fun goFullscreen() {
+        val monitor = glfwGetPrimaryMonitor()
+        glfwGetVideoMode(monitor)?.let { vidmode ->
+            glfwSetWindowMonitor(window, monitor, 0, 0, vidmode.width(), vidmode.height(), GLFW_DONT_CARE)
+            isFullscreen = true
+        }
+    }
+    
+    fun goWindowed() {
+        width = 1280
+        height = 720
+        glfwGetVideoMode(glfwGetPrimaryMonitor())?.let { vidmode ->
+            glfwSetWindowMonitor(window, 0,
+                    (vidmode.width() - width) / 2, (vidmode.height() - height) / 2,
+                    width, height,
+                    GLFW_DONT_CARE)
+            isFullscreen = false
+        }
     }
     
     fun swapBuffers() {

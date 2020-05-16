@@ -9,29 +9,36 @@ import org.joml.Matrix4f
 import org.joml.Quaternionf
 import org.joml.Vector3f
 import org.lwjgl.opengl.GL20.*
-import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
 
 
 class SceneRenderer {
     
-    private val shader = ShaderProgram.loadNamed("/shader")
+    private val shader = ShaderProgram.loadNamed("/shaders/shader")
     
     private val viewMatrix = Matrix4f()
     
     private val matrixBuffer = MemoryUtil.memAllocFloat(16)
     
-    private fun drawEntityRecursive(entity: Entity, parentTransform: Matrix4f, modelMatrixLocation: Int) {
+    private fun drawEntityRecursive(entity: Entity,
+                                    parentTransform: Matrix4f,
+                                    modelMatrixLocation: Int) {
         
         val modelMatrix = parentTransform.mul(entity.getModelMatrix(), Matrix4f())
-        modelMatrix.get(matrixBuffer)
-        glUniformMatrix4fv(modelMatrixLocation, false, matrixBuffer)
+        
+        if (entity.hasComponent(MeshComponent::class)) {
+            modelMatrix.get(matrixBuffer)
+            glUniformMatrix4fv(modelMatrixLocation, false, matrixBuffer)
 
-        val meshComponent = entity.getComponent(MeshComponent::class)!!
-        meshComponent.material.texture.bind()
-        meshComponent.mesh.render()
+            val meshComponent = entity.getComponent(MeshComponent::class)!!
+            
+            meshComponent.material.texture.bind()
+            meshComponent.mesh.render()
+        }
 
-        entity.getChildren().forEach { drawEntityRecursive(it, modelMatrix, modelMatrixLocation) }
+        entity.getChildren().forEach {
+            drawEntityRecursive(it, modelMatrix, modelMatrixLocation)
+        }
         
     }
     
@@ -46,6 +53,9 @@ class SceneRenderer {
             val modelMatrixLocation = shader.getUniformLocation("modelMatrix")
             val viewMatrixLocation = shader.getUniformLocation("viewMatrix")
             val projectionMatrixLocation = shader.getUniformLocation("projectionMatrix")
+
+            val baseColorLocation = shader.getUniformLocation("baseColor")
+            val useMaterialTextureLocation = shader.getUniformLocation("useMaterialTexture")
             
             val cameraComponent = camera.getComponent(CameraComponent::class)!!
             cameraComponent.matrix.get(matrixBuffer)
@@ -58,9 +68,10 @@ class SceneRenderer {
             glUniformMatrix4fv(viewMatrixLocation, false, matrixBuffer)
 
             val entities = scene.getEntities()
-                    .filter { it.hasComponent(MeshComponent::class) }
 
-            entities.forEach { drawEntityRecursive(it, Matrix4f().identity(), modelMatrixLocation) }
+            entities.forEach {
+                drawEntityRecursive(it, Matrix4f().identity(), modelMatrixLocation)
+            }
 
             glUseProgram(0)
 

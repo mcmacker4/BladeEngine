@@ -39,7 +39,8 @@ object BladeEngine {
         
         window = Window(1280, 720, "Hello Blade Engine")
 
-        glClearColor(0.3f, 0.6f, 0.9f, 1.0f)
+//        glClearColor(0.3f, 0.6f, 0.9f, 1.0f)
+        glClearColor(0f, 0f, 0f, 1.0f)
         
         keyboard = Keyboard()
         mouse = Mouse()
@@ -56,6 +57,8 @@ object BladeEngine {
         val frameTime = 1 / maxFPS
         
         Timer.start()
+        
+        glEnable(GL_CULL_FACE)
         
         glfwSetCursorPosCallback(window.ref()) { _, xpos, ypos ->  
             val dx = xpos - mouse.xpos
