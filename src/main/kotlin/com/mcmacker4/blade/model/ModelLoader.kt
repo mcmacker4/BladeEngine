@@ -10,6 +10,7 @@ import org.joml.Matrix4f
 import org.joml.Quaternionf
 import org.joml.Vector3f
 import org.lwjgl.assimp.*
+import org.lwjgl.system.MemoryUtil
 import java.nio.IntBuffer
 
 object Model {
@@ -20,15 +21,24 @@ object Model {
         val flags = Assimp.aiProcess_Triangulate or
                 Assimp.aiProcess_JoinIdenticalVertices or
                 Assimp.aiProcess_CalcTangentSpace
-//        val buffer = FileImport.resourceToBuffer("/$folder/$name")
-        Assimp.aiImportFile("$folder/$name", flags)?.use { aiScene ->
+        
+        val buffer = FileImport.resourceToBuffer("/$folder/$name")
+        
+        val entity = Assimp.aiImportFileFromMemory(buffer, flags, "glb")?.use { aiScene ->
             val rootNode = aiScene.mRootNode() ?: throw Exception("Scene has no root node.")
 
             val materials = processMaterials(aiScene, folder)
             val meshMaterialPairs = processMeshes(aiScene, materials)
-            
-            return processNodeRecursive(rootNode, meshMaterialPairs)
-        } ?: throw Exception("Could not load model at $folder/$name: " + Assimp.aiGetErrorString())
+
+            processNodeRecursive(rootNode, meshMaterialPairs)
+        }
+        
+        MemoryUtil.memFree(buffer)
+        
+        if (entity == null) 
+            throw Exception("Could not load model at $folder/$name: " + Assimp.aiGetErrorString())
+        
+        return entity
     }
     
     private fun processNodeRecursive(aiNode: AINode, meshMaterialPairs: ArrayList<MeshMaterialPair>): Entity {
@@ -89,23 +99,88 @@ object Model {
         aiScene.mMaterials()?.let { aiMaterialsBuffer ->
             for (i in 0 until count) {
                 val aiMaterial = AIMaterial.create(aiMaterialsBuffer.get(i))
-                materials.add(processSingleMaterial(aiMaterial, basePath))
+                materials.add(processSingleMaterial(aiScene, aiMaterial, basePath))
             }
         }
         return materials
     }
 
     @Suppress("CAST_NEVER_SUCCEEDS")
-    private fun processSingleMaterial(aiMaterial: AIMaterial, basePath: String) : Material {
+    private fun processSingleMaterial(aiScene: AIScene, aiMaterial: AIMaterial, basePath: String) : Material {
         val pathBuff = AIString.calloc()
         
         Assimp.aiGetMaterialTexture(aiMaterial, Assimp.aiTextureType_DIFFUSE, 0, pathBuff,
                 null as IntBuffer?, null, null, null, null, null)
 
-        var path = pathBuff.dataString()
-        if (path.isEmpty()) path = "white.png"
+        val path = pathBuff.dataString()
         
-        return Material(Texture2D.loadFromFileSystem("$basePath/$path"))
+        println("Texture path: $path")
+        
+        val texture = if (path.isNotEmpty())
+            getEmbeddedTexture(aiScene, path)
+        else
+            Texture2D.EMPTY
+        
+        return Material(texture)
+    }
+    
+    private fun getEmbeddedTexture(aiScene: AIScene, path: String) : Texture2D {
+        
+        val aiTexture = (if (path.startsWith("*")) {
+            findEmbeddedTextureByIndex(aiScene, path.substring(1).toInt())
+        } else findEmbeddedTextureByPath(aiScene, path))
+            ?: return Texture2D.EMPTY
+
+        if (aiTexture.mHeight() == 0) {
+            throw Exception("Embedded image is a regular file! Decode with stb_image" +
+                    " (if you find a way to get it as a ByteBuffer...")
+        } else {
+
+            val width = aiTexture.mWidth()
+            val height = aiTexture.mHeight()
+
+            val bytes = width * height * 4
+            val byteArray = ByteArray(bytes)
+
+            val aiTexels = aiTexture.pcData(aiTexture.mWidth() * aiTexture.mHeight())
+            for (y in 0 until height) {
+                for (x in 0 until width) {
+                    val pi = y * width + x
+                    val aiTexel = aiTexels.get(pi)
+                    byteArray[pi] = aiTexel.r()
+                    byteArray[pi + 1] = aiTexel.g()
+                    byteArray[pi + 2] = aiTexel.b()
+                    byteArray[pi + 3] = aiTexel.a()
+                }
+            }
+
+            val buffer = MemoryUtil.memAlloc(bytes)
+            buffer.put(byteArray)
+
+            val texture = Texture2D.loadFromMemory(width, height, buffer)
+
+            MemoryUtil.memFree(buffer)
+
+            return texture
+
+        }
+        
+    }
+    
+    private fun findEmbeddedTextureByIndex(aiScene: AIScene, index: Int) : AITexture? {
+        val aiTextureAddr = aiScene.mTextures()?.get(index) ?: return null
+        return AITexture.create(aiTextureAddr)
+    }
+    
+    private fun findEmbeddedTextureByPath(aiScene: AIScene, path: String) : AITexture? {
+        val aiTextures = aiScene.mTextures() ?: return null
+        val count = aiScene.mNumTextures()
+        for (i in 0 until count) {
+            val aiTexture = AITexture.create(aiTextures.get(i)) ?: continue
+            if (aiTexture.mFilename().dataString() == path)
+                return aiTexture
+        }
+        return null
     }
 
     private fun processMeshes(aiScene: AIScene, materials: ArrayList<Material>): ArrayList<MeshMaterialPair> {

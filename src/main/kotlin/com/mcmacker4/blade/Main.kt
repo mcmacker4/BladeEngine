@@ -106,7 +106,7 @@ fun main() {
 //    val triangle = Entity(Vector3f(0f, 0f, -1.5f))
 //    val triangle2 = Entity(Vector3f(0.5f, 0f, 0f), scale = Vector3f(0.3f))
     
-    val sponza = Model.loadFromFile("sponza", "sponza.gltf")
+    val sponza = Model.loadFromFile("models", "sponza.glb")
     
     println("Sponza is a total of ${countEntities(sponza)} entities.")
     
