@@ -85,6 +85,14 @@ class CloseGameBehaviour : BehaviourComponent(), KeyboardListener {
                 BladeEngine.window.goFullscreen()
             }
         }
+        
+        if (key == GLFW_KEY_G) {
+            if (BladeEngine.mouse.isGrabbed) {
+                BladeEngine.mouse.release()
+            } else {
+                BladeEngine.mouse.grab()
+            }
+        }
     }
 
 }
@@ -99,8 +107,6 @@ fun countEntities(entity: Entity): Int {
 fun main() {
 
     BladeEngine.initialize()
-    
-    BladeEngine.mouse.grab()
 
     val scene = Scene()
 //    val triangle = Entity(Vector3f(0f, 0f, -1.5f))

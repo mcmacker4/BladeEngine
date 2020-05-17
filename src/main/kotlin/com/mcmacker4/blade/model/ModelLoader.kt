@@ -20,14 +20,15 @@ object Model {
     fun loadFromFile(folder: String, name: String) : Entity {
         val flags = Assimp.aiProcess_Triangulate or
                 Assimp.aiProcess_JoinIdenticalVertices or
-                Assimp.aiProcess_CalcTangentSpace
+                Assimp.aiProcess_CalcTangentSpace or
+                Assimp.aiProcess_FlipUVs
         
         val buffer = FileImport.resourceToBuffer("/$folder/$name")
         
-        val entity = Assimp.aiImportFileFromMemory(buffer, flags, "glb")?.use { aiScene ->
+        val entity = Assimp.aiImportFileFromMemory(buffer, flags, name.substring(name.lastIndexOf(".") + 1))?.use { aiScene ->
             val rootNode = aiScene.mRootNode() ?: throw Exception("Scene has no root node.")
 
-            val materials = processMaterials(aiScene, folder)
+            val materials = processMaterials(aiScene)
             val meshMaterialPairs = processMeshes(aiScene, materials)
 
             processNodeRecursive(rootNode, meshMaterialPairs)
@@ -93,20 +94,20 @@ object Model {
         return nodeEntity
     }
 
-    private fun processMaterials(aiScene: AIScene, basePath: String) : ArrayList<Material> {
+    private fun processMaterials(aiScene: AIScene) : ArrayList<Material> {
         val count = aiScene.mNumMaterials()
         val materials = arrayListOf<Material>()
         aiScene.mMaterials()?.let { aiMaterialsBuffer ->
             for (i in 0 until count) {
                 val aiMaterial = AIMaterial.create(aiMaterialsBuffer.get(i))
-                materials.add(processSingleMaterial(aiScene, aiMaterial, basePath))
+                materials.add(processSingleMaterial(aiScene, aiMaterial))
             }
         }
         return materials
     }
 
     @Suppress("CAST_NEVER_SUCCEEDS")
-    private fun processSingleMaterial(aiScene: AIScene, aiMaterial: AIMaterial, basePath: String) : Material {
+    private fun processSingleMaterial(aiScene: AIScene, aiMaterial: AIMaterial) : Material {
         val pathBuff = AIString.calloc()
         
         Assimp.aiGetMaterialTexture(aiMaterial, Assimp.aiTextureType_DIFFUSE, 0, pathBuff,
@@ -132,8 +133,10 @@ object Model {
             ?: return Texture2D.EMPTY
 
         if (aiTexture.mHeight() == 0) {
-            throw Exception("Embedded image is a regular file! Decode with stb_image" +
-                    " (if you find a way to get it as a ByteBuffer...")
+            val address = aiTexture.pcData(0).address0()
+            val buffer = MemoryUtil.memByteBuffer(address, aiTexture.mWidth())
+            
+            return Texture2D.readTexture(buffer)
         } else {
 
             val width = aiTexture.mWidth()

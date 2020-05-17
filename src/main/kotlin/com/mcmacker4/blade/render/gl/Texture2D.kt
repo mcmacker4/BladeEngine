@@ -13,16 +13,19 @@ import java.nio.ByteBuffer
 class Texture2D {
     
     private var id: Int
+    val useAlpha: Boolean
     
     constructor(width: Int, height: Int, data: ByteBuffer, format: Int,
                 internalFormat: Int = GL_RGBA, type: Int = GL_UNSIGNED_BYTE,
-                parameters: Map<Int, Int> = defaultParams()) {
+                parameters: Map<Int, Int> = defaultParams(), useAlpha: Boolean = false) {
         id = glGenTextures()
         bind()
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data)
         glGenerateMipmap(GL_TEXTURE_2D)
         applyParameters(parameters)
         unbind()
+        
+        this.useAlpha = useAlpha
     }
     
     constructor(width: Int, height: Int, format: Int, internalFormat: Int, type: Int) {
@@ -30,10 +33,13 @@ class Texture2D {
         bind()
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, MemoryUtil.NULL)
         unbind()
+
+        this.useAlpha = false
     }
     
     private constructor(id: Int) {
         this.id = id
+        useAlpha = false
     }
     
     private fun applyParameters(parameters: Map<Int, Int>) {
@@ -87,7 +93,7 @@ class Texture2D {
             return Texture2D(width, height, data, format, parameters = parameters)
         }
         
-        private fun readTexture(buffer: ByteBuffer, parameters: Map<Int, Int>) : Texture2D {
+        fun readTexture(buffer: ByteBuffer, parameters: Map<Int, Int> = defaultParams()) : Texture2D {
             val texture = MemoryStack.stackPush().use { stack ->
                 val widthBuff = stack.mallocInt(1)
                 val heightBuff = stack.mallocInt(1)
@@ -96,8 +102,9 @@ class Texture2D {
                 // TODO: Support for RGBA
                 val image = stbi_load_from_memory(buffer, widthBuff, heightBuff, channelsBuff, 4)
                         ?: throw RuntimeException("Failed to load image: ${stbi_failure_reason()}")
-
-                val texture = Texture2D(widthBuff.get(), heightBuff.get(), image, GL_RGBA, parameters = parameters)
+                
+                val texture = Texture2D(widthBuff.get(), heightBuff.get(), image,
+                        GL_RGBA, parameters = parameters, useAlpha = channelsBuff.get() == 4)
 
                 stbi_image_free(image)
 

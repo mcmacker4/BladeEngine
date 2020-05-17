@@ -22,7 +22,7 @@ class Window(private var width: Int, private var height: Int, title: String) {
     init {
         glfwDefaultWindowHints()
         
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE)
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE)
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE)
         
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
@@ -42,6 +42,12 @@ class Window(private var width: Int, private var height: Int, title: String) {
         
         GL.createCapabilities()
         glViewport(0, 0, width, height)
+        
+        glfwSetWindowSizeCallback(window) { _, width, height ->  
+            this.width = width
+            this.height = height
+            glViewport(0, 0, width, height)
+        }
         
         glfwGetVideoMode(glfwGetPrimaryMonitor())?.let { vidmode ->
             glfwSetWindowPos(

@@ -32,7 +32,15 @@ class SceneRenderer {
 
             val meshComponent = entity.getComponent(MeshComponent::class)!!
             
-            meshComponent.material.texture.bind()
+            val texture = meshComponent.material.texture 
+            texture.bind()
+            if (texture.useAlpha) {
+                glEnable(GL_BLEND)
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+            } else {
+                glDisable(GL_BLEND)
+            }
+            
             meshComponent.mesh.render()
         }
 
@@ -53,9 +61,6 @@ class SceneRenderer {
             val modelMatrixLocation = shader.getUniformLocation("modelMatrix")
             val viewMatrixLocation = shader.getUniformLocation("viewMatrix")
             val projectionMatrixLocation = shader.getUniformLocation("projectionMatrix")
-
-            val baseColorLocation = shader.getUniformLocation("baseColor")
-            val useMaterialTextureLocation = shader.getUniformLocation("useMaterialTexture")
             
             val cameraComponent = camera.getComponent(CameraComponent::class)!!
             cameraComponent.matrix.get(matrixBuffer)
