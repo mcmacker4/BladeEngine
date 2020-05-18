@@ -11,13 +11,15 @@ class Mesh(indices: IntArray, positions: FloatArray, normals: FloatArray, uvcoor
     
     private val count = indices.size
     
+    private val elements = ElementArrayBuffer(indices)
+    
     private val attributes = arrayListOf(
             VertexAttribute(0, VertexBufferObject(positions, GL_STATIC_DRAW), GL_FLOAT, 3),
             VertexAttribute(1, VertexBufferObject(normals, GL_STATIC_DRAW), GL_FLOAT, 3),
             VertexAttribute(2, VertexBufferObject(uvcoords, GL_STATIC_DRAW), GL_FLOAT, 2)
     )
     
-    private val vao = VertexArrayObject(ElementArrayBuffer(indices), attributes)
+    private val vao = VertexArrayObject(elements, attributes)
     
     fun render() {
         vao.bind()
@@ -26,6 +28,7 @@ class Mesh(indices: IntArray, positions: FloatArray, normals: FloatArray, uvcoor
     }
     
     fun delete() {
+        elements.delete()
         attributes.forEach { it.vbo.delete() }
         vao.delete()
     }

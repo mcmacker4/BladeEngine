@@ -3,7 +3,7 @@ package com.mcmacker4.blade
 import com.mcmacker4.blade.display.Window
 import com.mcmacker4.blade.input.Keyboard
 import com.mcmacker4.blade.input.Mouse
-import com.mcmacker4.blade.render.SceneRenderer
+import com.mcmacker4.blade.render.RenderingPipeline
 import com.mcmacker4.blade.scene.Scene
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL11.*
@@ -16,7 +16,7 @@ object BladeEngine {
     lateinit var scene: Scene
         private set
     
-    private lateinit var sceneRenderer: SceneRenderer
+    private lateinit var renderingPipeline: RenderingPipeline
     
     lateinit var keyboard: Keyboard
         private set
@@ -45,7 +45,7 @@ object BladeEngine {
         keyboard = Keyboard()
         mouse = Mouse()
         
-        sceneRenderer = SceneRenderer()
+        renderingPipeline = RenderingPipeline()
     }
     
     fun start(scene: Scene) {
@@ -53,14 +53,12 @@ object BladeEngine {
         
         window.show()
 
-        val maxFPS = 300.0
+        val maxFPS = 500.0
         val frameTime = 1 / maxFPS
         
         Timer.start()
         
         glEnable(GL_CULL_FACE)
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
         glfwSetCursorPosCallback(window.ref()) { _, xpos, ypos ->  
             val dx = xpos - mouse.xpos
@@ -81,12 +79,11 @@ object BladeEngine {
             
             scene.update()
             
-            glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
-            sceneRenderer.render(scene)
+            renderingPipeline.render(scene)
             
             window.swapBuffers()
             
-            while (glfwGetTime() < nextFrameTime) Thread.yield()
+//            while (glfwGetTime() < nextFrameTime) Thread.yield()
         }
         
     }
@@ -95,8 +92,13 @@ object BladeEngine {
         this.running = false
     }
     
+    fun onWindowSizeChanged(width: Int, height: Int) {
+        println("New resolution: $width, $height")
+        renderingPipeline.onWindowSizeChanged(width, height)
+    }
+    
     fun destroy() {
-        sceneRenderer.destroy()
+        renderingPipeline.destroy()
         window.destroy()
 
         glfwTerminate()

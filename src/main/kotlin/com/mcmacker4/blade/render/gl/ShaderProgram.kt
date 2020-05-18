@@ -50,7 +50,7 @@ class ShaderProgram(vSource: String, fSource: String) {
         private fun readFileToString(path: String): String {
             return ShaderProgram::class.java.getResourceAsStream(path)?.use {
                 it.bufferedReader().readText()
-            } ?: throw Exception("File not found.")
+            } ?: throw Exception("File not found: $path")
         }
         
         private fun compileShader(type: Int, source: String): Int {

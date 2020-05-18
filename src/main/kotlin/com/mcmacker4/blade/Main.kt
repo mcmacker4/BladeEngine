@@ -15,7 +15,7 @@ import kotlin.math.PI
 class TriangleBehaviour : BehaviourComponent() {
     
     override fun onUpdate() {
-        val deltaRot = Math.PI * Timer.delta
+        val deltaRot = Math.PI * Timer.delta * 0.02f
         entity?.apply {
             rotation.mul(Quaternionf().rotateY(deltaRot.toFloat()))
         }

@@ -1,12 +1,17 @@
 package com.mcmacker4.blade.display
 
+import com.mcmacker4.blade.BladeEngine
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11.glViewport
-import org.lwjgl.system.MemoryUtil
 
 
-class Window(private var width: Int, private var height: Int, title: String) {
+class Window(width: Int, height: Int, title: String) {
+   
+    var width: Int = width
+        private set
+    var height: Int = height
+        private set
     
     private val window: Long
     
@@ -30,7 +35,7 @@ class Window(private var width: Int, private var height: Int, title: String) {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3)
 
         window = glfwCreateWindow(width, height, title, 0, 0)
-        if (window == MemoryUtil.NULL) {
+        if (window == 0L) {
             throw Exception("Could not create Window.")
         }
         
@@ -43,10 +48,11 @@ class Window(private var width: Int, private var height: Int, title: String) {
         GL.createCapabilities()
         glViewport(0, 0, width, height)
         
-        glfwSetWindowSizeCallback(window) { _, width, height ->  
-            this.width = width
-            this.height = height
-            glViewport(0, 0, width, height)
+        glfwSetWindowSizeCallback(window) { _, w, h ->  
+            this.width = w
+            this.height = h
+            glViewport(0, 0, w, h)
+            BladeEngine.onWindowSizeChanged(w, h)
         }
         
         glfwGetVideoMode(glfwGetPrimaryMonitor())?.let { vidmode ->

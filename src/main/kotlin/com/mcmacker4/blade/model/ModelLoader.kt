@@ -18,6 +18,9 @@ object Model {
     private class MeshMaterialPair(val mesh: Mesh, val material: Material)
     
     fun loadFromFile(folder: String, name: String) : Entity {
+        
+        println("Loading Model: /$folder/$name")
+        
         val flags = Assimp.aiProcess_Triangulate or
                 Assimp.aiProcess_JoinIdenticalVertices or
                 Assimp.aiProcess_CalcTangentSpace or
@@ -88,6 +91,7 @@ object Model {
             for (i in 0 until aiNode.mNumChildren()) {
                 val aiChild = AINode.create(aiChildren.get(i))
                 nodeEntity.addChild(processNodeRecursive(aiChild, meshMaterialPairs))
+                aiChild.free()
             }
         }
         
@@ -101,6 +105,7 @@ object Model {
             for (i in 0 until count) {
                 val aiMaterial = AIMaterial.create(aiMaterialsBuffer.get(i))
                 materials.add(processSingleMaterial(aiScene, aiMaterial))
+                aiMaterial.free()
             }
         }
         return materials
@@ -114,8 +119,6 @@ object Model {
                 null as IntBuffer?, null, null, null, null, null)
 
         val path = pathBuff.dataString()
-        
-        println("Texture path: $path")
         
         val texture = if (path.isNotEmpty())
             getEmbeddedTexture(aiScene, path)
@@ -241,7 +244,7 @@ object Model {
     
     private fun processNormals(aiMesh: AIMesh, vertexCount: Int): FloatArray {
         val normals = FloatArray(vertexCount * 3)
-        val aiNormals = aiMesh.mVertices() ?: return normals
+        val aiNormals = aiMesh.mNormals() ?: return normals
         for (i in 0 until vertexCount) {
             val aiNormal = aiNormals.get(i)
             normals[i * 3    ] = aiNormal.x()

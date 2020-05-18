@@ -17,8 +17,8 @@ class ElementArrayBuffer(indices: IntArray) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id)
     }
     
-    fun unbind() {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+    fun delete() {
+        glDeleteBuffers(id)
     }
     
 }

@@ -16,6 +16,7 @@ class Entity(
 ) : MouseListener, KeyboardListener {
     
     private val modelMatrix = Matrix4f().identity()
+    val worldTransformMatrix = Matrix4f()
     
     private var scene: Scene? = null
     private var parent: Entity? = null

@@ -28,18 +28,20 @@ object FileImport {
 
     fun resourceToBuffer(path: String) : ByteBuffer {
         Texture2D::class.java.getResourceAsStream(path)?.use { source ->
-            val url = Texture2D::class.java.getResource(path)
-            val length = File(url.toURI()).length()
             Channels.newChannel(source).use { channel ->
-                val buffer = MemoryUtil.memAlloc(length.toInt() + 1)
-                var readBytes = 0
-                while (readBytes != -1) {
-                    readBytes = channel.read(buffer)
+                var buffer = MemoryUtil.memAlloc(8 * 1024) // 8KB initial size
+                while (true) {
+                    val bytes = channel.read(buffer)
+                    if (bytes == -1) break
+                    if (buffer.remaining() == 0)
+                        buffer = MemoryUtil.memRealloc(buffer, buffer.capacity() * 3 / 2) // 50%
                 }
                 buffer.flip()
                 return buffer
             }
-        } ?: throw FileNotFoundException(path)
+        }
+
+        throw FileNotFoundException(path)
     }
     
 }

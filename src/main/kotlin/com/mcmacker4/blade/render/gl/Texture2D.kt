@@ -1,7 +1,6 @@
 package com.mcmacker4.blade.render.gl
 
-import com.mcmacker4.blade.file.FileImport.fileToBuffer
-import com.mcmacker4.blade.file.FileImport.resourceToBuffer
+import com.mcmacker4.blade.file.FileImport
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL30.glGenerateMipmap
 import org.lwjgl.stb.STBImage.*
@@ -28,10 +27,11 @@ class Texture2D {
         this.useAlpha = useAlpha
     }
     
-    constructor(width: Int, height: Int, format: Int, internalFormat: Int, type: Int) {
+    constructor(width: Int, height: Int, format: Int, internalFormat: Int, type: Int, parameters: Map<Int, Int>) {
         id = glGenTextures()
         bind()
-        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, MemoryUtil.NULL)
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, 0)
+        applyParameters(parameters)
         unbind()
 
         this.useAlpha = false
@@ -56,6 +56,10 @@ class Texture2D {
         glBindTexture(GL_TEXTURE_2D, 0)
     }
     
+    fun ref() : Int {
+        return id
+    }
+    
     fun delete() {
         glDeleteTextures(id)
         id = 0
@@ -74,7 +78,7 @@ class Texture2D {
         
         fun loadFromResource(path: String, parameters: Map<Int, Int> = defaultParams()) : Texture2D {
             println("Loading texture from resource: $path")
-            val buffer = resourceToBuffer(path)
+            val buffer = FileImport.resourceToBuffer(path)
             val texture = readTexture(buffer, parameters)
             MemoryUtil.memFree(buffer)
             return texture
@@ -82,7 +86,7 @@ class Texture2D {
         
         fun loadFromFileSystem(path: String, parameters: Map<Int, Int> = defaultParams()) : Texture2D {
             println("Loading texture from file: $path")
-            val buffer = fileToBuffer(path)
+            val buffer = FileImport.fileToBuffer(path)
             val texture = readTexture(buffer, parameters)
             MemoryUtil.memFree(buffer)
             return texture
