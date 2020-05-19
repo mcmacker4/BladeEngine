@@ -6,8 +6,15 @@ import com.mcmacker4.blade.render.gl.VertexAttribute
 import com.mcmacker4.blade.render.gl.VertexBufferObject
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL15.GL_STATIC_DRAW
+import java.io.Closeable
 
-class Mesh(indices: IntArray, positions: FloatArray, normals: FloatArray, uvcoords: FloatArray) {
+class Mesh(
+        indices: IntArray,
+        positions: FloatArray,
+        normals: FloatArray,
+        tangents: FloatArray,
+        uvcoords: FloatArray
+) : Closeable {
     
     private val count = indices.size
     
@@ -16,7 +23,8 @@ class Mesh(indices: IntArray, positions: FloatArray, normals: FloatArray, uvcoor
     private val attributes = arrayListOf(
             VertexAttribute(0, VertexBufferObject(positions, GL_STATIC_DRAW), GL_FLOAT, 3),
             VertexAttribute(1, VertexBufferObject(normals, GL_STATIC_DRAW), GL_FLOAT, 3),
-            VertexAttribute(2, VertexBufferObject(uvcoords, GL_STATIC_DRAW), GL_FLOAT, 2)
+            VertexAttribute(2, VertexBufferObject(tangents, GL_STATIC_DRAW), GL_FLOAT, 3),
+            VertexAttribute(3, VertexBufferObject(uvcoords, GL_STATIC_DRAW), GL_FLOAT, 2)
     )
     
     private val vao = VertexArrayObject(elements, attributes)
@@ -27,10 +35,10 @@ class Mesh(indices: IntArray, positions: FloatArray, normals: FloatArray, uvcoor
         vao.unbind()
     }
     
-    fun delete() {
-        elements.delete()
-        attributes.forEach { it.vbo.delete() }
-        vao.delete()
+    override fun close() {
+        elements.close()
+        attributes.forEach { it.vbo.close() }
+        vao.close()
     }
     
 }

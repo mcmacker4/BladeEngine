@@ -1,17 +1,17 @@
-#version 330 core
+#version 430 core
 
 in vec3 _normal;
 in vec2 _uvcoords;
 
 out vec4 color;
 
-uniform sampler2D materialTexture;
+layout (binding = 0) uniform sampler2D diffuseTexture;
 
 const vec3 lightDir = normalize(vec3(0, 1, -1));
 
 void main() {
     float bright = max(0.4, max(0, dot(_normal, lightDir)));
-    vec4 textureColor = texture(materialTexture, _uvcoords);
+    vec4 textureColor = texture(diffuseTexture, _uvcoords);
     
     vec3 finalColor = textureColor.xyz * bright;
     

@@ -7,9 +7,12 @@ import com.mcmacker4.blade.render.RenderingPipeline
 import com.mcmacker4.blade.scene.Scene
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL11.*
+import org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT
+import org.lwjgl.opengl.GL43.glDebugMessageCallback
+import java.io.Closeable
 
 
-object BladeEngine {
+object BladeEngine : Closeable {
     
     lateinit var window: Window
         private set
@@ -39,7 +42,6 @@ object BladeEngine {
         
         window = Window(1280, 720, "Hello Blade Engine")
 
-//        glClearColor(0.3f, 0.6f, 0.9f, 1.0f)
         glClearColor(0f, 0f, 0f, 1.0f)
         
         keyboard = Keyboard()
@@ -53,7 +55,7 @@ object BladeEngine {
         
         window.show()
 
-        val maxFPS = 500.0
+        val maxFPS = 300.0
         val frameTime = 1 / maxFPS
         
         Timer.start()
@@ -83,7 +85,7 @@ object BladeEngine {
             
             window.swapBuffers()
             
-//            while (glfwGetTime() < nextFrameTime) Thread.yield()
+            while (glfwGetTime() < nextFrameTime) Thread.yield()
         }
         
     }
@@ -97,9 +99,9 @@ object BladeEngine {
         renderingPipeline.onWindowSizeChanged(width, height)
     }
     
-    fun destroy() {
-        renderingPipeline.destroy()
-        window.destroy()
+    override fun close() {
+        renderingPipeline.close()
+        window.close()
 
         glfwTerminate()
     }

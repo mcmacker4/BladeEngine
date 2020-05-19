@@ -1,9 +1,10 @@
 package com.mcmacker4.blade.render.gl
 
 import org.lwjgl.opengl.GL20.*
+import java.io.Closeable
 
 
-class ShaderProgram(vSource: String, fSource: String) {
+class ShaderProgram(vSource: String, fSource: String) : Closeable {
     
     private var id: Int
     private val uniformCache = hashMapOf<String, Int>()
@@ -33,7 +34,7 @@ class ShaderProgram(vSource: String, fSource: String) {
     fun getUniformLocation(name: String)
             = uniformCache.getOrPut(name) { glGetUniformLocation(id, name) }
     
-    fun delete() {
+    override fun close() {
         glDeleteProgram(id)
         id = 0
     }

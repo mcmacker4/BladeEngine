@@ -2,22 +2,24 @@ package com.mcmacker4.blade
 
 import com.mcmacker4.blade.input.KeyboardListener
 import com.mcmacker4.blade.input.MouseListener
-import com.mcmacker4.blade.model.Model
+import com.mcmacker4.blade.model.ModelLoader
 import com.mcmacker4.blade.scene.Entity
 import com.mcmacker4.blade.scene.Scene
 import com.mcmacker4.blade.scene.components.BehaviourComponent
 import com.mcmacker4.blade.scene.components.CameraComponent
+import com.mcmacker4.blade.scene.components.PointLightComponent
 import org.joml.Quaternionf
 import org.joml.Vector3f
 import org.lwjgl.glfw.GLFW.*
 import kotlin.math.PI
+import kotlin.math.sin
+import kotlin.random.Random
 
-class TriangleBehaviour : BehaviourComponent() {
+class LightBehaviour : BehaviourComponent() {
     
     override fun onUpdate() {
-        val deltaRot = Math.PI * Timer.delta * 0.02f
         entity?.apply {
-            rotation.mul(Quaternionf().rotateY(deltaRot.toFloat()))
+            position.x = sin(Timer.now.toFloat()) * 5
         }
     }
     
@@ -70,7 +72,7 @@ class CameraBehaviour : BehaviourComponent(), MouseListener {
 }
 
 
-class CloseGameBehaviour : BehaviourComponent(), KeyboardListener {
+class SystemBehaviour : BehaviourComponent(), KeyboardListener {
     
     override fun onKeyDown(key: Int) {}
 
@@ -109,10 +111,8 @@ fun main() {
     BladeEngine.initialize()
 
     val scene = Scene()
-//    val triangle = Entity(Vector3f(0f, 0f, -1.5f))
-//    val triangle2 = Entity(Vector3f(0.5f, 0f, 0f), scale = Vector3f(0.3f))
     
-    val sponza = Model.loadFromFile("models", "sponza.glb")
+    val sponza = ModelLoader.loadFromFile("models", "sponza.glb")
     
     println("Sponza is a total of ${countEntities(sponza)} entities.")
     
@@ -120,44 +120,30 @@ fun main() {
     camera.addComponent(CameraComponent(Math.toRadians(80.0)))
     camera.addComponent(CameraBehaviour())
 
-    scene.setActiveCamera(camera)
-
-//    val mesh = Mesh(
-//            floatArrayOf(
-//                    -0.5f, -0.5f, 0f,
-//                    0.5f, -0.5f, 0f,
-//                    0f, 0.5f, 0f
-//            ),
-//            floatArrayOf(
-//                    0f, 0f, 0f,
-//                    0f, 0f, 0f,
-//                    0f, 0f, 0f
-//            ),
-//            floatArrayOf(
-//                    0f, 1f,
-//                    1f, 1f,
-//                    0.5f, 0f
-//            )
-//    )
-
-//    val material = Material(Texture2D.loadFromFile("/textures/texture.png"))
+    val light = Entity()
+    light.position.y = 2f
+    light.position.x = 5f
+    light.addComponent(PointLightComponent(Vector3f(5f)))
+//    light.addComponent(LightBehaviour())
+    scene.addEntity(light)
     
-//    triangle.addComponent(MeshComponent(mesh, material))
-//    //triangle.addComponent(TriangleBehaviour())
-//    triangle.addChild(triangle2)
-//    
-//    triangle2.addComponent(MeshComponent(mesh, material))
-//    triangle2.addComponent(TriangleBehaviour())
-
+//    for (i in -2..2) {
+//        val light = Entity()
+//        light.position.y = 2f
+//        light.position.x = i.toFloat() * 2
+//        light.addComponent(PointLightComponent(Vector3f(Random.nextFloat(), Random.nextFloat(), Random.nextFloat())))
+//        light.addComponent(LightBehaviour(i))
+//        scene.addEntity(light)
+//    }
+    
+    scene.setActiveCamera(camera)
     scene.addEntity(camera)
-//    scene.addEntity(triangle)
     scene.addEntity(sponza)
     
-    
-    scene.addEntity(Entity(components = arrayListOf(CloseGameBehaviour())))
+    scene.addEntity(Entity(components = arrayListOf(SystemBehaviour())))
 
     BladeEngine.start(scene)
     
-    BladeEngine.destroy()
+    BladeEngine.close()
     
 }

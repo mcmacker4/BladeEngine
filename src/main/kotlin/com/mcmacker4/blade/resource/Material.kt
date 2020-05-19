@@ -4,15 +4,7 @@ import com.mcmacker4.blade.render.gl.Texture2D
 
 
 class Material(
-        val texture: Texture2D
-) {
-
-//    override fun equals(other: Any?): Boolean {
-//        return other is Material && other.materialId == materialId
-//    }
-//
-//    override fun hashCode(): Int {
-//        return materialId
-//    }
-    
-}
+        val diffuse: Texture2D,
+        val normal: Texture2D,
+        val metallicRoughness: Texture2D
+)

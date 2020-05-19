@@ -1,11 +1,11 @@
-#version 330 core
+#version 430 core
 
 in vec2 _uvcoords;
 
 out vec4 color;
 
-uniform sampler2D frame;
+layout (binding = 0) uniform sampler2D blitTexture;
 
 void main() {
-    color = texture(frame, _uvcoords);
+    color = texture(blitTexture, _uvcoords);
 }

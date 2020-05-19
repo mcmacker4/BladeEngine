@@ -1,20 +1,30 @@
-#version 330 core
+#version 430 core
 
 in vec3 _position;
-in vec3 _normal;
 in vec2 _uvcoords;
 
-layout (location = 0) out vec4 g_position;
-layout (location = 1) out vec4 g_normal;
-layout (location = 2) out vec4 g_diffuse;
+in mat3 _TBN;
 
-uniform sampler2D materialTexture;
+layout (location = 0) out vec3 position;
+layout (location = 1) out vec3 normal;
+layout (location = 2) out vec4 diffuse;
+layout (location = 3) out vec3 metallicRoughness;
+
+layout (binding = 0) uniform sampler2D diffuseMap;
+layout (binding = 1) uniform sampler2D normalMap;
+layout (binding = 2) uniform sampler2D metallicRoughessMap;
 
 void main() {
     
-    g_position = vec4(_position, 1.0);
-    g_normal = vec4(_normal, 1.0);
+    position = _position;
     
-    g_diffuse = texture(materialTexture, _uvcoords);
+    vec3 normalSample = texture2D(normalMap, _uvcoords).xyz;
+    normalSample = normalize(normalSample * 2.0 - 1.0);
+    
+    normal = normalize(_TBN * normalSample), 1.0;
+    
+    diffuse = texture(diffuseMap, _uvcoords);
+    
+    metallicRoughness = texture(metallicRoughessMap, _uvcoords).rgb;
     
 }

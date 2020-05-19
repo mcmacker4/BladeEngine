@@ -4,9 +4,12 @@ import com.mcmacker4.blade.BladeEngine
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11.glViewport
+import org.lwjgl.opengl.GLUtil
+import org.lwjgl.system.Callback
+import java.io.Closeable
 
 
-class Window(width: Int, height: Int, title: String) {
+class Window(width: Int, height: Int, title: String) : Closeable {
    
     var width: Int = width
         private set
@@ -24,6 +27,8 @@ class Window(width: Int, height: Int, title: String) {
     val aspectRatio: Float
         get() = width.toFloat() / height.toFloat()
     
+    private val debugProc: Callback?
+    
     init {
         glfwDefaultWindowHints()
         
@@ -40,12 +45,13 @@ class Window(width: Int, height: Int, title: String) {
         }
         
         println("Window has been created.")
-
-        glfwSetWindowSizeCallback(window, this::resizeCallback)
         
         glfwMakeContextCurrent(window)
         
         GL.createCapabilities()
+        debugProc = null
+//        debugProc = GLUtil.setupDebugMessageCallback()
+        
         glViewport(0, 0, width, height)
         
         glfwSetWindowSizeCallback(window) { _, w, h ->  
@@ -69,14 +75,6 @@ class Window(width: Int, height: Int, title: String) {
         }
         
         glfwSwapInterval(0)
-    }
-    
-    private fun resizeCallback(window: Long, width: Int, height: Int) {
-        if (window == this.window) {
-            this.width = width
-            this.height = height
-            glViewport(0, 0, width, height)
-        }
     }
     
     fun show() {
@@ -107,8 +105,9 @@ class Window(width: Int, height: Int, title: String) {
         glfwSwapBuffers(window)
     }
     
-    fun destroy() {
+    override fun close() {
         glfwDestroyWindow(window)
+        debugProc?.apply { free() }
     }
     
     fun ref() = window

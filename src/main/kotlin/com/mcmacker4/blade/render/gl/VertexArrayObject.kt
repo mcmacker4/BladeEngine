@@ -3,9 +3,10 @@ package com.mcmacker4.blade.render.gl
 import org.lwjgl.opengl.GL20.glEnableVertexAttribArray
 import org.lwjgl.opengl.GL20.glVertexAttribPointer
 import org.lwjgl.opengl.GL30.*
+import java.io.Closeable
 
 
-class VertexArrayObject(elements: ElementArrayBuffer, attribs: List<VertexAttribute>) {
+class VertexArrayObject(elements: ElementArrayBuffer, attribs: List<VertexAttribute>) : Closeable {
     
     private var id = glGenVertexArrays()
     
@@ -31,7 +32,7 @@ class VertexArrayObject(elements: ElementArrayBuffer, attribs: List<VertexAttrib
         glBindVertexArray(0)
     }
     
-    fun delete() {
+    override fun close() {
         glDeleteVertexArrays(id)
         id = 0
     }

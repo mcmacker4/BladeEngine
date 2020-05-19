@@ -1,9 +1,10 @@
 package com.mcmacker4.blade.render.gl
 
 import org.lwjgl.opengl.GL15.*
+import java.io.Closeable
 
 
-class VertexBufferObject {
+class VertexBufferObject : Closeable {
     
     private var id: Int = glGenBuffers()
 
@@ -31,7 +32,7 @@ class VertexBufferObject {
         glBufferSubData(GL_ARRAY_BUFFER, offset, data)
     }
     
-    fun delete() {
+    override fun close() {
         glDeleteBuffers(id)
         id = 0
     }

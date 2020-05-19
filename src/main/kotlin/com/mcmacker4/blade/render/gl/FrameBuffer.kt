@@ -1,18 +1,18 @@
 package com.mcmacker4.blade.render.gl
 
 import org.lwjgl.opengl.GL30.*
+import java.io.Closeable
 
 
-class FrameBuffer {
-    
-    private val id = glGenFramebuffers()
+open class FrameBuffer : Closeable {
+
+    private val id: Int = glGenFramebuffers()
     
     fun bind(target: Int) {
         glBindFramebuffer(target, id)
     }
     
     fun attachTexture2D(target: Int, attachment: Int, texture: Texture2D, level: Int = 0) {
-        texture.bind()
         glFramebufferTexture2D(target, attachment, GL_TEXTURE_2D, texture.ref(), level)
     }
     
@@ -22,7 +22,7 @@ class FrameBuffer {
     
     fun isComplete(target: Int) = glCheckFramebufferStatus(target) == GL_FRAMEBUFFER_COMPLETE
     
-    fun delete() {
+    override fun close() {
         glDeleteFramebuffers(id)
     }
     

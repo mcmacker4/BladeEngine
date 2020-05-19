@@ -1,9 +1,10 @@
 package com.mcmacker4.blade.render.gl
 
 import org.lwjgl.opengl.GL15.*
+import java.io.Closeable
 
 
-class ElementArrayBuffer(indices: IntArray) {
+class ElementArrayBuffer(indices: IntArray) : Closeable {
     
     private val id = glGenBuffers()
     
@@ -17,7 +18,7 @@ class ElementArrayBuffer(indices: IntArray) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id)
     }
     
-    fun delete() {
+    override fun close() {
         glDeleteBuffers(id)
     }
     

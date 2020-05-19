@@ -13,7 +13,7 @@ import org.lwjgl.assimp.*
 import org.lwjgl.system.MemoryUtil
 import java.nio.IntBuffer
 
-object Model {
+object ModelLoader {
     
     private class MeshMaterialPair(val mesh: Mesh, val material: Material)
     
@@ -113,19 +113,28 @@ object Model {
 
     @Suppress("CAST_NEVER_SUCCEEDS")
     private fun processSingleMaterial(aiScene: AIScene, aiMaterial: AIMaterial) : Material {
+        
+        val diffuse = loadTextureByType(aiMaterial, aiScene, Assimp.aiTextureType_DIFFUSE)
+        val normal = loadTextureByType(aiMaterial, aiScene, Assimp.aiTextureType_NORMALS)
+        val metallicRoughness = loadTextureByType(aiMaterial, aiScene, Assimp.AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE)
+        
+        return Material(diffuse, normal, metallicRoughness)
+    }
+    
+    private fun loadTextureByType(aiMaterial: AIMaterial, aiScene: AIScene, type: Int) : Texture2D {
         val pathBuff = AIString.calloc()
         
-        Assimp.aiGetMaterialTexture(aiMaterial, Assimp.aiTextureType_DIFFUSE, 0, pathBuff,
+        Assimp.aiGetMaterialTexture(aiMaterial, type, 0, pathBuff,
                 null as IntBuffer?, null, null, null, null, null)
 
         val path = pathBuff.dataString()
         
-        val texture = if (path.isNotEmpty())
+        pathBuff.free()
+
+        return if (path.isNotEmpty())
             getEmbeddedTexture(aiScene, path)
         else
             Texture2D.EMPTY
-        
-        return Material(texture)
     }
     
     private fun getEmbeddedTexture(aiScene: AIScene, path: String) : Texture2D {
@@ -208,9 +217,10 @@ object Model {
         val indices = processIndices(aiMesh)
         val vertices = processVertices(aiMesh, vertexCount)
         val normals = processNormals(aiMesh, vertexCount)
+        val tangents = processTangents(aiMesh, vertexCount)
         val uvcoords = processUvCoords(aiMesh, vertexCount)
         
-        val mesh = Mesh(indices, vertices, normals, uvcoords)
+        val mesh = Mesh(indices, vertices, normals, tangents, uvcoords)
         return MeshMaterialPair(mesh, material)
     }
     
@@ -252,6 +262,18 @@ object Model {
             normals[i * 3 + 2] = aiNormal.z()
         }
         return normals
+    }
+
+    private fun processTangents(aiMesh: AIMesh, vertexCount: Int): FloatArray {
+        val tangents = FloatArray(vertexCount * 3)
+        val aiTangents = aiMesh.mTangents() ?: return tangents
+        for (i in 0 until vertexCount) {
+            val aiTangent = aiTangents.get(i)
+            tangents[i * 3    ] = aiTangent.x()
+            tangents[i * 3 + 1] = aiTangent.y()
+            tangents[i * 3 + 2] = aiTangent.z()
+        }
+        return tangents
     }
     
     private fun processUvCoords(aiMesh: AIMesh, vertexCount: Int): FloatArray {
