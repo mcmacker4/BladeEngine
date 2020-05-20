@@ -23,7 +23,6 @@ class CameraComponent(
         return viewMatrix
     }
     
-    override fun onInit() {}
     override fun onUpdate() {
         entity?.let { entity ->
             val pos = entity.position

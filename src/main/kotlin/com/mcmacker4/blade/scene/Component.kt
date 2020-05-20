@@ -10,9 +10,12 @@ abstract class Component {
     
     fun setParent(parent: Entity?) {
         this.entity = parent
+        onAttach()
     }
     
-    abstract fun onInit()
-    abstract fun onUpdate()
+    open fun onInit() {}
+    open fun onUpdate() {}
+    
+    open fun onAttach() {}
     
 }

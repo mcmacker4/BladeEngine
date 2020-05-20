@@ -21,7 +21,7 @@ class LightingPass : Closeable {
             gBuffer: GBuffer,
             scene: Scene) {
 
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0)
+        target.bind(GL_FRAMEBUFFER)
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
         
         glDisable(GL_DEPTH_TEST)
@@ -30,7 +30,8 @@ class LightingPass : Closeable {
         
         val lights = scene.getEntities().filter { it.hasComponent(PointLightComponent::class) }
 
-        glUniform1i(shader.getUniformLocation("numLights"), lights.size)
+        val numLightsLocation = shader.getUniformLocation("numLights")
+        glUniform1i(numLightsLocation, lights.size)
 
         lights.forEachIndexed { index, light ->
             val pointLight = light.getComponent(PointLightComponent::class)!!
@@ -46,6 +47,8 @@ class LightingPass : Closeable {
         gBuffer.normalTexture.bind()
         glActiveTexture(GL_TEXTURE2)
         gBuffer.diffuseTexture.bind()
+        glActiveTexture(GL_TEXTURE3)
+        gBuffer.metallicRoughnessTexture.bind()
         
         quadVAO.bind()
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0)

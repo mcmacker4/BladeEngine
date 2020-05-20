@@ -1,4 +1,4 @@
-package com.mcmacker4.blade.resource
+package com.mcmacker4.blade.model
 
 import com.mcmacker4.blade.render.gl.ElementArrayBuffer
 import com.mcmacker4.blade.render.gl.VertexArrayObject

@@ -36,14 +36,10 @@ class RenderingPipeline : Closeable {
     fun render(scene: Scene) {
         
         gBufferPass.render(gBuffer, sceneRenderer, scene)
-        lightingPass.render(
-                lightingBuffer,
-                quadVAO,
-                gBuffer,
-                scene
-        )
+        lightingPass.render(lightingBuffer, quadVAO, gBuffer, scene)
 
-//        blitTexture(gBuffer.metallicRoughnessTexture)
+        //Currently only copies, but will turn into post-processing
+        blitTexture(lightingBuffer.result)
         
     }
     
@@ -70,22 +66,22 @@ class RenderingPipeline : Closeable {
             gBuffer.close()
             gBuffer = GBuffer(width, height)
 
-//            lightingBuffer.close()
-//            lightingBuffer = LightingBuffer(width, height)
+            lightingBuffer.close()
+            lightingBuffer = LightingBuffer(width, height)
         }
     }
 
     override fun close() {
-//        quadIndices.close()
-//        quadVBO.close()
-//        quadVAO.close()
-//
+        quadIndices.close()
+        quadVBO.close()
+        quadVAO.close()
+
         gBufferPass.close()
-//        lightingPass.close()
+        lightingPass.close()
         
         gBuffer.close()
-//        lightingBuffer.close()
-
+        lightingBuffer.close()
+        
         sceneRenderer.close()
     }
     

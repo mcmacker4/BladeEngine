@@ -2,8 +2,6 @@ package com.mcmacker4.blade.model
 
 import com.mcmacker4.blade.file.FileImport
 import com.mcmacker4.blade.render.gl.Texture2D
-import com.mcmacker4.blade.resource.Material
-import com.mcmacker4.blade.resource.Mesh
 import com.mcmacker4.blade.scene.Entity
 import com.mcmacker4.blade.scene.components.MeshComponent
 import org.joml.Matrix4f
@@ -138,6 +136,8 @@ object ModelLoader {
     }
     
     private fun getEmbeddedTexture(aiScene: AIScene, path: String) : Texture2D {
+        
+        println("Loading embedded texture: $path")
         
         val aiTexture = (if (path.startsWith("*")) {
             findEmbeddedTextureByIndex(aiScene, path.substring(1).toInt())

@@ -6,9 +6,4 @@ import org.joml.Vector3f
 
 class PointLightComponent(
         val color: Vector3f
-) : Component() {
-    
-    override fun onInit() {}
-    override fun onUpdate() {}
-
-}
+) : Component()

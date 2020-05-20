@@ -17,9 +17,18 @@ import kotlin.random.Random
 
 class LightBehaviour : BehaviourComponent() {
     
+    private var originalX = 0f
+    private var seed = Random.nextFloat() * PI.toFloat()
+    
     override fun onUpdate() {
         entity?.apply {
-            position.x = sin(Timer.now.toFloat()) * 5
+            position.x = sin(Timer.now.toFloat() + seed) * 2 + originalX
+        }
+    }
+
+    override fun onAttach() {
+        entity?.apply {
+            originalX = position.x
         }
     }
     
@@ -120,21 +129,18 @@ fun main() {
     camera.addComponent(CameraComponent(Math.toRadians(80.0)))
     camera.addComponent(CameraBehaviour())
 
-    val light = Entity()
-    light.position.y = 2f
-    light.position.x = 5f
-    light.addComponent(PointLightComponent(Vector3f(5f)))
-//    light.addComponent(LightBehaviour())
-    scene.addEntity(light)
-    
-//    for (i in -2..2) {
-//        val light = Entity()
-//        light.position.y = 2f
-//        light.position.x = i.toFloat() * 2
-//        light.addComponent(PointLightComponent(Vector3f(Random.nextFloat(), Random.nextFloat(), Random.nextFloat())))
-//        light.addComponent(LightBehaviour(i))
-//        scene.addEntity(light)
-//    }
+    repeat(20) {
+        val light = Entity()
+        light.position.x = Random.nextFloat() * 10 - 5
+        light.position.y = Random.nextFloat() * 6 + 1
+        light.addComponent(PointLightComponent(Vector3f(
+                Random.nextFloat() + 1.5f,
+                Random.nextFloat() + 1.5f,
+                Random.nextFloat() + 1.5f
+        )))
+        light.addComponent(LightBehaviour())
+        scene.addEntity(light)
+    }
     
     scene.setActiveCamera(camera)
     scene.addEntity(camera)
