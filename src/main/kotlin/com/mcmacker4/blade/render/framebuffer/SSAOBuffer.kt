@@ -7,28 +7,28 @@ import org.lwjgl.opengl.GL30.*
 import java.io.Closeable
 
 
-class LightingBuffer(width: Int, height: Int) : FrameBuffer(), Closeable {
+class SSAOBuffer(width: Int, height: Int) : FrameBuffer(), Closeable {
 
-    val result = Texture2D(width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE)
-    private val depthStencilBuffer = RenderBuffer(width, height, GL_DEPTH24_STENCIL8)
-    
+    val ssao = Texture2D(width / 2, height / 2, GL_RGB, GL_RGB, GL_UNSIGNED_BYTE)
+    private val depthStencilBuffer = RenderBuffer(width / 2, height / 2, GL_DEPTH24_STENCIL8)
+
     init {
         bind(GL_FRAMEBUFFER)
-        attachTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, result)
+        attachTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, ssao)
         attachRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, depthStencilBuffer)
-
+        
         glDrawBuffers(intArrayOf(GL_COLOR_ATTACHMENT0))
 
         if (!isComplete(GL_FRAMEBUFFER))
             throw Exception("Framebuffer is not complete.")
-        
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0)
     }
-    
+
     override fun close() {
-        result.close()
+        ssao.close()
         depthStencilBuffer.close()
         super.close()
     }
-    
+
 }

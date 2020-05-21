@@ -26,6 +26,8 @@ object BladeEngine : Closeable {
     lateinit var mouse: Mouse
         private set
     
+    var useAO = true
+    
     private var running = true
     
     fun initialize() {

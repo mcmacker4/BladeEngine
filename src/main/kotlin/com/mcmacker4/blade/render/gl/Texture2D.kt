@@ -3,13 +3,13 @@ package com.mcmacker4.blade.render.gl
 import com.mcmacker4.blade.file.FileImport
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE
-import org.lwjgl.opengl.GL30
 import org.lwjgl.opengl.GL30.glGenerateMipmap
 import org.lwjgl.stb.STBImage.*
 import org.lwjgl.system.MemoryStack
 import org.lwjgl.system.MemoryUtil
 import java.io.Closeable
 import java.nio.ByteBuffer
+import java.nio.FloatBuffer
 
 
 class Texture2D : Closeable {
@@ -18,12 +18,20 @@ class Texture2D : Closeable {
     val useAlpha: Boolean
     
     constructor(width: Int, height: Int, data: ByteBuffer, format: Int,
-                internalFormat: Int = GL_RGBA, type: Int = GL_UNSIGNED_BYTE,
+                internalFormat: Int = GL_RGBA,
                 useAlpha: Boolean = false) {
         id = glGenTextures()
         bind()
-        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data)
-        glGenerateMipmap(GL_TEXTURE_2D)
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data)
+        this.useAlpha = useAlpha
+    }
+
+    constructor(width: Int, height: Int, data: FloatBuffer, format: Int,
+                internalFormat: Int = GL_RGBA,
+                useAlpha: Boolean = false) {
+        id = glGenTextures()
+        bind()
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_FLOAT, data)
         this.useAlpha = useAlpha
     }
     
@@ -87,6 +95,7 @@ class Texture2D : Closeable {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+            glGenerateMipmap(GL_TEXTURE_2D)
             texture.unbind()
             return texture
         }
@@ -108,6 +117,8 @@ class Texture2D : Closeable {
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR)
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+
+                glGenerateMipmap(GL_TEXTURE_2D)
 
                 stbi_image_free(image)
                 

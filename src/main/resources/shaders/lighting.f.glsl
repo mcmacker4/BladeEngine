@@ -8,8 +8,11 @@ layout (binding = 0) uniform sampler2D positionTexture;
 layout (binding = 1) uniform sampler2D normalTexture;
 layout (binding = 2) uniform sampler2D diffuseTexture;
 layout (binding = 3) uniform sampler2D metallicRoughnessTexture;
+layout (binding = 4) uniform sampler2D ssao;
 
 uniform vec3 cameraPosition;
+
+uniform bool useAO;
 
 struct Light {
     vec3 position;
@@ -64,6 +67,8 @@ void main() {
     vec3 N = texture(normalTexture, _uvcoords).xyz;
     vec3 diffuse = texture(diffuseTexture, _uvcoords).xyz;
     
+    float ao = texture(ssao, _uvcoords).r;
+    
     vec4 metallicRoughness = texture(metallicRoughnessTexture, _uvcoords);
     float metallic = metallicRoughness.b;
     float roughness = metallicRoughness.g;
@@ -100,8 +105,8 @@ void main() {
     }
 
     vec3 color = Lo;
-    color = color / (color + vec3(1.0));
-    color = pow(color, vec3(1.0/2.2));
-
-    FragColor = vec4(Lo, 1.0);
+    if (useAO) {
+        color *= ao;
+    }
+    FragColor = vec4(color, 1.0);
 }

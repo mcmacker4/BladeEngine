@@ -1,7 +1,9 @@
-package com.mcmacker4.blade.render
+package com.mcmacker4.blade.render.passes
 
+import com.mcmacker4.blade.BladeEngine
 import com.mcmacker4.blade.render.framebuffer.GBuffer
 import com.mcmacker4.blade.render.framebuffer.LightingBuffer
+import com.mcmacker4.blade.render.framebuffer.SSAOBlurBuffer
 import com.mcmacker4.blade.render.gl.ShaderProgram
 import com.mcmacker4.blade.render.gl.VertexArrayObject
 import com.mcmacker4.blade.scene.Scene
@@ -19,10 +21,13 @@ class LightingPass : Closeable {
             target: LightingBuffer,
             quadVAO: VertexArrayObject,
             gBuffer: GBuffer,
+            ssaoBlurBuffer: SSAOBlurBuffer,
             scene: Scene) {
 
         target.bind(GL_FRAMEBUFFER)
         glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+
+        glViewport(0, 0, BladeEngine.window.width, BladeEngine.window.height)
         
         glDisable(GL_DEPTH_TEST)
         
@@ -41,6 +46,8 @@ class LightingPass : Closeable {
             glUniform3f(lightColorLocation, pointLight.color.x, pointLight.color.y, pointLight.color.z)
         }
         
+        glUniform1i(shader.getUniformLocation("useAO"), if(BladeEngine.useAO) 1 else 0)
+        
         glActiveTexture(GL_TEXTURE0)
         gBuffer.positionTexture.bind()
         glActiveTexture(GL_TEXTURE1)
@@ -49,6 +56,8 @@ class LightingPass : Closeable {
         gBuffer.diffuseTexture.bind()
         glActiveTexture(GL_TEXTURE3)
         gBuffer.metallicRoughnessTexture.bind()
+        glActiveTexture(GL_TEXTURE4)
+        ssaoBlurBuffer.ssaoblur.bind()
         
         quadVAO.bind()
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0)

@@ -37,7 +37,7 @@ class LightBehaviour : BehaviourComponent() {
 
 class CameraBehaviour : BehaviourComponent(), MouseListener {
     
-    private val speed = 5f
+    private val speed = 1f
     private val sensitivity = 0.001f
     
     private var pitch = 0.0
@@ -103,6 +103,10 @@ class SystemBehaviour : BehaviourComponent(), KeyboardListener {
             } else {
                 BladeEngine.mouse.grab()
             }
+        }
+        
+        if (key == GLFW_KEY_O) {
+            BladeEngine.useAO = !BladeEngine.useAO
         }
     }
 

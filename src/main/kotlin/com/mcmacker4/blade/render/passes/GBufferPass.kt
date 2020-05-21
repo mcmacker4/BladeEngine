@@ -1,5 +1,7 @@
-package com.mcmacker4.blade.render
+package com.mcmacker4.blade.render.passes
 
+import com.mcmacker4.blade.BladeEngine
+import com.mcmacker4.blade.render.SceneRenderer
 import com.mcmacker4.blade.render.framebuffer.GBuffer
 import com.mcmacker4.blade.render.gl.ShaderProgram
 import com.mcmacker4.blade.scene.Scene
@@ -20,6 +22,8 @@ class GBufferPass : Closeable {
 
             target.bind(GL_FRAMEBUFFER)
             glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+            
+            glViewport(0, 0, BladeEngine.window.width, BladeEngine.window.height)
 
             shader.use()
 

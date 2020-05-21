@@ -3,7 +3,13 @@ package com.mcmacker4.blade.render
 import com.mcmacker4.blade.BladeEngine
 import com.mcmacker4.blade.render.framebuffer.GBuffer
 import com.mcmacker4.blade.render.framebuffer.LightingBuffer
+import com.mcmacker4.blade.render.framebuffer.SSAOBlurBuffer
+import com.mcmacker4.blade.render.framebuffer.SSAOBuffer
 import com.mcmacker4.blade.render.gl.*
+import com.mcmacker4.blade.render.passes.GBufferPass
+import com.mcmacker4.blade.render.passes.LightingPass
+import com.mcmacker4.blade.render.passes.SSAOBlurPass
+import com.mcmacker4.blade.render.passes.SSAOPass
 import com.mcmacker4.blade.scene.Scene
 import org.lwjgl.opengl.GL30.*
 import java.io.Closeable
@@ -15,10 +21,14 @@ class RenderingPipeline : Closeable {
     
     private val blitShader = ShaderProgram.loadNamed("/shaders/blit")
     
-    private var gBufferPass = GBufferPass()
-    private var lightingPass = LightingPass()
+    private val gBufferPass = GBufferPass()
+    private val ssaoPass = SSAOPass()
+    private val ssaoBlurPass = SSAOBlurPass()
+    private val lightingPass = LightingPass()
     
     private var gBuffer = GBuffer(BladeEngine.window.width, BladeEngine.window.height)
+    private var ssaoBuffer = SSAOBuffer(BladeEngine.window.width, BladeEngine.window.height)
+    private var ssaoBlurBuffer = SSAOBlurBuffer(BladeEngine.window.width, BladeEngine.window.height)
     private var lightingBuffer = LightingBuffer(BladeEngine.window.width, BladeEngine.window.height)
 
     private val quadIndices = ElementArrayBuffer(intArrayOf(0, 1, 2, 0, 2, 3))
@@ -36,9 +46,12 @@ class RenderingPipeline : Closeable {
     fun render(scene: Scene) {
         
         gBufferPass.render(gBuffer, sceneRenderer, scene)
-        lightingPass.render(lightingBuffer, quadVAO, gBuffer, scene)
+        
+        ssaoPass.render(ssaoBuffer, quadVAO, gBuffer, scene)
+        ssaoBlurPass.render(ssaoBlurBuffer, quadVAO, ssaoBuffer)
+        
+        lightingPass.render(lightingBuffer, quadVAO, gBuffer, ssaoBlurBuffer, scene)
 
-        //Currently only copies, but will turn into post-processing
         blitTexture(lightingBuffer.result)
         
     }
@@ -46,6 +59,7 @@ class RenderingPipeline : Closeable {
     private fun blitTexture(texture: Texture2D) {
 
         blitShader.use()
+        glViewport(0, 0, BladeEngine.window.width, BladeEngine.window.height)
 
         glDisable(GL_DEPTH_TEST)
 
@@ -65,6 +79,12 @@ class RenderingPipeline : Closeable {
         if (width > 0 && height > 0) {
             gBuffer.close()
             gBuffer = GBuffer(width, height)
+            
+            ssaoBuffer.close()
+            ssaoBuffer = SSAOBuffer(width, height)
+            
+            ssaoBlurBuffer.close()
+            ssaoBlurBuffer = SSAOBlurBuffer(width, height)
 
             lightingBuffer.close()
             lightingBuffer = LightingBuffer(width, height)
@@ -77,9 +97,13 @@ class RenderingPipeline : Closeable {
         quadVAO.close()
 
         gBufferPass.close()
+        ssaoPass.close()
+        ssaoBlurPass.close()
         lightingPass.close()
         
         gBuffer.close()
+        ssaoBuffer.close()
+        ssaoBlurBuffer.close()
         lightingBuffer.close()
         
         sceneRenderer.close()

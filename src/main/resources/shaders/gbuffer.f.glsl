@@ -21,7 +21,7 @@ void main() {
     vec3 normalSample = texture2D(normalMap, _uvcoords).xyz;
     normalSample = normalize(normalSample * 2.0 - 1.0);
     
-    normal = normalize(_TBN * normalSample), 1.0;
+    normal = normalize(_TBN * normalSample);
     
     diffuse = texture(diffuseMap, _uvcoords);
     
