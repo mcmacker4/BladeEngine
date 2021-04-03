@@ -111,7 +111,6 @@ object ModelLoader {
 
     @Suppress("CAST_NEVER_SUCCEEDS")
     private fun processSingleMaterial(aiScene: AIScene, aiMaterial: AIMaterial) : Material {
-        
         val diffuse = loadTextureByType(aiMaterial, aiScene, Assimp.aiTextureType_DIFFUSE)
         val normal = loadTextureByType(aiMaterial, aiScene, Assimp.aiTextureType_NORMALS)
         val metallicRoughness = loadTextureByType(aiMaterial, aiScene, Assimp.AI_MATKEY_GLTF_PBRMETALLICROUGHNESS_METALLICROUGHNESS_TEXTURE)
@@ -137,17 +136,15 @@ object ModelLoader {
     
     private fun getEmbeddedTexture(aiScene: AIScene, path: String) : Texture2D {
         
-        println("Loading embedded texture: $path")
-        
         val aiTexture = (if (path.startsWith("*")) {
             findEmbeddedTextureByIndex(aiScene, path.substring(1).toInt())
         } else findEmbeddedTextureByPath(aiScene, path))
             ?: return Texture2D.EMPTY
 
         if (aiTexture.mHeight() == 0) {
-            val address = aiTexture.pcData(0).address0()
-            val buffer = MemoryUtil.memByteBuffer(address, aiTexture.mWidth())
-            
+//            val address = aiTexture.pcData(0).address0()
+//            val buffer = MemoryUtil.memByteBuffer(address, aiTexture.mWidth())
+            val buffer = aiTexture.pcDataCompressed()
             return Texture2D.readTexture(buffer)
         } else {
 
@@ -157,7 +154,8 @@ object ModelLoader {
             val bytes = width * height * 4
             val byteArray = ByteArray(bytes)
 
-            val aiTexels = aiTexture.pcData(aiTexture.mWidth() * aiTexture.mHeight())
+//            val aiTexels = aiTexture.pcData(aiTexture.mWidth() * aiTexture.mHeight())
+            val aiTexels = aiTexture.pcData()
             for (y in 0 until height) {
                 for (x in 0 until width) {
                     val pi = y * width + x

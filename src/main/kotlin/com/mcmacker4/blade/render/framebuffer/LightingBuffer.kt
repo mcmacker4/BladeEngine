@@ -16,7 +16,7 @@ class LightingBuffer(width: Int, height: Int) : FrameBuffer(), Closeable {
         bind(GL_FRAMEBUFFER)
         attachTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, result)
         attachRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, depthStencilBuffer)
-
+        
         glDrawBuffers(intArrayOf(GL_COLOR_ATTACHMENT0))
 
         if (!isComplete(GL_FRAMEBUFFER))

@@ -7,8 +7,6 @@ import com.mcmacker4.blade.render.RenderingPipeline
 import com.mcmacker4.blade.scene.Scene
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL11.*
-import org.lwjgl.opengl.GL43.GL_DEBUG_OUTPUT
-import org.lwjgl.opengl.GL43.glDebugMessageCallback
 import java.io.Closeable
 
 
@@ -34,6 +32,8 @@ object BladeEngine : Closeable {
         
         println("Initializing Engine")
         
+        println("Java Version: ${System.getProperty("java.version")}")
+        
         glfwSetErrorCallback { error, description ->
             println("GLFW Error $error: $description")
         }
@@ -44,7 +44,7 @@ object BladeEngine : Closeable {
         
         window = Window(1280, 720, "Hello Blade Engine")
 
-        glClearColor(0f, 0f, 0f, 1.0f)
+        glClearColor(0f, 0f, 0f, 0.0f)
         
         keyboard = Keyboard()
         mouse = Mouse()
@@ -77,6 +77,11 @@ object BladeEngine : Closeable {
         
         while (running && !window.shouldClose) {
             val nextFrameTime = glfwGetTime() + frameTime
+            
+//            Runtime.getRuntime().let {
+//                val mem = it.totalMemory() - it.freeMemory()
+//                println("Memory Usage: ${mem / 1000000}Mb / ${it.totalMemory() / 1000000}Mb")
+//            }
             
             glfwPollEvents()
             Timer.update()

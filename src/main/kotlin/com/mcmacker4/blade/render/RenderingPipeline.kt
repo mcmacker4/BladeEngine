@@ -30,7 +30,7 @@ class RenderingPipeline : Closeable {
     private var ssaoBuffer = SSAOBuffer(BladeEngine.window.width, BladeEngine.window.height)
     private var ssaoBlurBuffer = SSAOBlurBuffer(BladeEngine.window.width, BladeEngine.window.height)
     private var lightingBuffer = LightingBuffer(BladeEngine.window.width, BladeEngine.window.height)
-
+    
     private val quadIndices = ElementArrayBuffer(intArrayOf(0, 1, 2, 0, 2, 3))
     private val quadVBO = VertexBufferObject(floatArrayOf(
             -1f, 1f, 0f,
@@ -46,10 +46,12 @@ class RenderingPipeline : Closeable {
     fun render(scene: Scene) {
         
         gBufferPass.render(gBuffer, sceneRenderer, scene)
-        
-        ssaoPass.render(ssaoBuffer, quadVAO, gBuffer, scene)
-        ssaoBlurPass.render(ssaoBlurBuffer, quadVAO, ssaoBuffer)
-        
+
+        if (BladeEngine.useAO) {
+            ssaoPass.render(ssaoBuffer, quadVAO, gBuffer, scene)
+            ssaoBlurPass.render(ssaoBlurBuffer, quadVAO, ssaoBuffer)
+        }
+
         lightingPass.render(lightingBuffer, quadVAO, gBuffer, ssaoBlurBuffer, scene)
 
         blitTexture(lightingBuffer.result)

@@ -1,5 +1,6 @@
 package com.mcmacker4.blade.scene
 
+import com.mcmacker4.blade.render.gl.Texture2D
 import com.mcmacker4.blade.scene.components.CameraComponent
 import org.lwjgl.glfw.GLFW.GLFW_PRESS
 import org.lwjgl.glfw.GLFW.GLFW_RELEASE
@@ -10,6 +11,8 @@ class Scene {
     private val entities = HashSet<Entity>()
     
     private var activeCamera: Entity? = null
+    
+    var environment: Texture2D? = null
 
     fun getEntities() : Set<Entity> = entities
     

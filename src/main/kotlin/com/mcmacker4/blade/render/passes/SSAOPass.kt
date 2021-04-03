@@ -40,7 +40,6 @@ class SSAOPass : Closeable {
                     Random.nextFloat() * 2 - 1,
                     Random.nextFloat()
             ).normalize().mul(Random.nextFloat())
-            println("Sample $index: $sample")
             glUniform3f(location, sample.x, sample.y, sample.z)
         }
         

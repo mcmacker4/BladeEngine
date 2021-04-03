@@ -1,4 +1,4 @@
-#version 430 core
+#version 460 core
 
 in vec2 _uvcoords;
 
@@ -63,9 +63,12 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
 }
 
 void main() {
+    
     vec3 position = texture(positionTexture, _uvcoords).xyz;
     vec3 N = texture(normalTexture, _uvcoords).xyz;
-    vec3 diffuse = texture(diffuseTexture, _uvcoords).xyz;
+    vec4 diffuseAlpha = texture(diffuseTexture, _uvcoords);
+    vec3 diffuse = diffuseAlpha.rgb;
+    float alpha = diffuseAlpha.a;
     
     float ao = texture(ssao, _uvcoords).r;
     
@@ -104,9 +107,7 @@ void main() {
         Lo += (kD * diffuse / PI + specular) * radiance * NdotL;
     }
 
-    vec3 color = Lo;
-    if (useAO) {
-        color *= ao;
-    }
-    FragColor = vec4(color, 1.0);
+    vec3 color = Lo * (useAO ? ao : 1.0);
+    
+    FragColor = vec4(color, alpha);
 }

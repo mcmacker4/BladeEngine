@@ -1,11 +1,13 @@
 package com.mcmacker4.blade.display
 
 import com.mcmacker4.blade.BladeEngine
+import org.joml.Vector2i
+import org.joml.Vector2ic
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL11.glViewport
-import org.lwjgl.opengl.GLUtil
 import org.lwjgl.system.Callback
+import org.lwjgl.system.MemoryStack
 import java.io.Closeable
 
 
@@ -29,6 +31,18 @@ class Window(width: Int, height: Int, title: String) : Closeable {
     
     private val debugProc: Callback?
     
+    val framebufferSize: Vector2ic
+        get() {
+            val size = Vector2i()
+            MemoryStack.stackPush().use { stack ->
+                val width = stack.mallocInt(1)
+                val height = stack.mallocInt(1)
+                glfwGetFramebufferSize(window, width, height)
+                size.set(width.get(), height.get())
+            }
+            return size
+        }
+    
     init {
         glfwDefaultWindowHints()
         
@@ -37,7 +51,7 @@ class Window(width: Int, height: Int, title: String) : Closeable {
         
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE)
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4)
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3)
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6)
 
         window = glfwCreateWindow(width, height, title, 0, 0)
         if (window == 0L) {

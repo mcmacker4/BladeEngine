@@ -12,15 +12,13 @@ import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 
 
-class Texture2D : Closeable {
+class Texture2D : Texture, Closeable {
     
-    private var id: Int
     val useAlpha: Boolean
     
     constructor(width: Int, height: Int, data: ByteBuffer, format: Int,
                 internalFormat: Int = GL_RGBA,
-                useAlpha: Boolean = false) {
-        id = glGenTextures()
+                useAlpha: Boolean = false) : super() {
         bind()
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data)
         this.useAlpha = useAlpha
@@ -28,15 +26,13 @@ class Texture2D : Closeable {
 
     constructor(width: Int, height: Int, data: FloatBuffer, format: Int,
                 internalFormat: Int = GL_RGBA,
-                useAlpha: Boolean = false) {
-        id = glGenTextures()
+                useAlpha: Boolean = false) : super() {
         bind()
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_FLOAT, data)
         this.useAlpha = useAlpha
     }
     
-    constructor(width: Int, height: Int, format: Int, internalFormat: Int, type: Int) {
-        id = glGenTextures()
+    constructor(width: Int, height: Int, format: Int, internalFormat: Int, type: Int) : super() {
         bind()
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, 0)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
@@ -46,26 +42,16 @@ class Texture2D : Closeable {
         this.useAlpha = false
     }
     
-    private constructor(id: Int) {
-        this.id = id
+    private constructor(id: Int) : super(id) {
         useAlpha = false
     }
     
     fun bind() {
-        glBindTexture(GL_TEXTURE_2D, id)
+        bind(GL_TEXTURE_2D)
     }
     
     fun unbind() {
         glBindTexture(GL_TEXTURE_2D, 0)
-    }
-    
-    fun ref() : Int {
-        return id
-    }
-    
-    override fun close() {
-        glDeleteTextures(id)
-        id = 0
     }
     
     companion object {
@@ -78,6 +64,10 @@ class Texture2D : Closeable {
             val texture = readTexture(buffer)
             MemoryUtil.memFree(buffer)
             return texture
+        }
+        
+        fun loadFromResourceFloat(path: String) {
+            println("Loading texture from resource: $path")
         }
         
         fun loadFromFileSystem(path: String) : Texture2D {
@@ -110,6 +100,8 @@ class Texture2D : Closeable {
                 val image = stbi_load_from_memory(buffer, widthBuff, heightBuff, channelsBuff, 4)
                         ?: throw RuntimeException("Failed to load image: ${stbi_failure_reason()}")
                 
+//                println("Texture size: ${widthBuff.get(0)}x${heightBuff.get(0)}")
+                
                 val texture = Texture2D(widthBuff.get(), heightBuff.get(), image,
                         GL_RGBA, useAlpha = channelsBuff.get() == 4)
 
@@ -125,6 +117,18 @@ class Texture2D : Closeable {
                 texture.unbind()
 
                 texture
+            }
+        }
+        
+        fun readTextureFloats(buffer: ByteBuffer) {
+            return MemoryStack.stackPush().use { stack ->
+                val widthBuff = stack.mallocInt(1)
+                val heightBuff = stack.mallocInt(1)
+                val channelsBuff = stack.mallocInt(1)
+                
+                val image = stbi_loadf_from_memory(buffer, widthBuff, heightBuff, channelsBuff, 0)
+                
+                
             }
         }
         
