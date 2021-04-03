@@ -16,6 +16,6 @@ void main() {
             result += texture(ssao, _uvcoords + offset).r;
         }
     }
-    FragColor = result / 25f;
+    FragColor = result / 25.0;
 
 }
